@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/">
+    <Project Path="src/backend/SB.Solicitudes.Api/SB.Solicitudes.Api.csproj" />
+    <Project Path="src/backend/SB.Solicitudes.Application/SB.Solicitudes.Application.csproj" />
+    <Project Path="src/backend/SB.Solicitudes.Domain/SB.Solicitudes.Domain.csproj" />
+    <Project Path="src/backend/SB.Solicitudes.Infrastructure/SB.Solicitudes.Infrastructure.csproj" />
+    <Project Path="src/backend/SB.Solicitudes.Services/SB.Solicitudes.Services.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SB.Solicitudes.IntegrationTests/SB.Solicitudes.IntegrationTests.csproj" />
+    <Project Path="tests/SB.Solicitudes.UnitTests/SB.Solicitudes.UnitTests.csproj" />
+  </Folder>
+</Solution>

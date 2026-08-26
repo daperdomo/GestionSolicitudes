@@ -1,0 +1,30 @@
+# .NET
+**/bin/
+**/obj/
+.vs/
+TestResults/
+*.user
+*.suo
+
+# Frontend
+**/node_modules/
+**/dist/
+**/.vite/
+*.local
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets and local overrides
+appsettings.Local.json
+appsettings.Production.json
+.env
+.env.*
+!.env.example
+
+# Runtime files used by the future text repository
+*.tmp
+*.bak

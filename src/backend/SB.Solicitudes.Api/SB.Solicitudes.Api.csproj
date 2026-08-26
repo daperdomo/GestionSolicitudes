@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SB.Solicitudes.Application\SB.Solicitudes.Application.csproj" />
+    <ProjectReference Include="..\SB.Solicitudes.Infrastructure\SB.Solicitudes.Infrastructure.csproj" />
+    <ProjectReference Include="..\SB.Solicitudes.Services\SB.Solicitudes.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="App_Data\entidades-gubernamentales.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

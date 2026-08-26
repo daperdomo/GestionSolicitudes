@@ -1,0 +1,6 @@
+@SB.Solicitudes.Api_HostAddress = http://localhost:5080
+
+GET {{SB.Solicitudes.Api_HostAddress}}/health
+Accept: application/json
+
+###

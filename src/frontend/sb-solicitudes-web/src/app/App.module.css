@@ -1,0 +1,44 @@
+.page {
+  align-items: center;
+  background: rgb(237 240 247);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1rem 2.5rem rgb(13 48 72 / 12%);
+  color: rgb(13 48 72 / 90%);
+  max-width: 42rem;
+  padding: 3rem;
+  text-align: center;
+  width: 100%;
+}
+
+.logo {
+  height: auto;
+  margin-bottom: 2rem;
+  max-width: 20rem;
+  width: 100%;
+}
+
+.heading {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.heading h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0;
+}
+
+.card p {
+  color: #485b68;
+  line-height: 1.6;
+  margin: 1rem 0 0;
+}
