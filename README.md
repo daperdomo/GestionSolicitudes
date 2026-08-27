@@ -1,41 +1,49 @@
 # SB.Solicitudes
 
-Base de una plataforma interna para administrar solicitudes de servicios tecnológicos
-de la Superintendencia de Bancos de la República Dominicana.
+Plataforma interna para registrar, asignar y dar seguimiento a solicitudes de servicios tecnológicos de la Superintendencia de Bancos de la República Dominicana.
 
-## Estado actual
+## Funcionalidad implementada
 
-Este repositorio contiene únicamente el scaffold compilable. Todavía no implementa
-entidades de dominio, persistencia, autenticación ni casos de uso productivos.
+- Login JWT con roles `Administrador`, `Analista` y `Solicitante`.
+- Auto-registro de Solicitantes desde el login y registro administrativo con roles, activación/desactivación y contraseña inicial segura.
+- Autorización por rol y por recurso: un solicitante solo consulta y comenta sus propias solicitudes.
+- Creación, detalle tipo Work Item, filtros, ordenamiento y paginación server-side.
+- Edición inline de estado, responsable, prioridad, área, tipo y fecha compromiso mediante endpoints `PATCH` específicos.
+- Asignación/reasignación a cualquier usuario activo, comentarios públicos/internos, actividad e historiales inmutables.
+- Matriz explícita de transiciones; el cierre exige comentario y solo Administrador/Analista puede reabrir.
+- Concurrencia optimista mediante `RowVersion` para evitar sobrescrituras silenciosas.
+- Notificaciones persistidas en SQL Server y despachadas mediante un adaptador de logging reemplazable.
+- Dashboard con abiertas, cerradas, vencidas, agrupaciones y últimas solicitudes.
+- CRUD de entidades gubernamentales respaldado por JSON UTF-8 con escritura atómica.
+- React responsive con rutas protegidas, estados de carga/error/vacío y cliente HTTP centralizado.
 
-## Stack
+## Stack y arquitectura
 
-- .NET 8 y ASP.NET Core Web API
-- Onion Architecture compatible con Clean Architecture
-- React 19, TypeScript y Vite
-- xUnit para pruebas
-- Serilog para logging estructurado
-- Swagger/OpenAPI
+- .NET 8, ASP.NET Core, MediatR/CQRS, EF Core 8, SQL Server, JWT, Swagger y Serilog.
+- React 19, TypeScript, React Router, Vite y CSS Modules.
+- xUnit y `WebApplicationFactory` para pruebas unitarias y de integración.
+- Onion Architecture: `Domain <- Application <- Infrastructure/Services <- Api`.
 
-## Requisitos locales
+La solución está en `SB.Solicitudes.slnx`. No se incluye `global.json`: puede utilizarse el SDK 8 o uno posterior compatible con `net8.0`.
 
-- SDK de .NET 8 o un SDK posterior capaz de compilar `net8.0`
-- Node.js 22 o posterior
-- npm
+## Requisitos
 
-La máquina de desarrollo actual utiliza SDK .NET 10.0.204 para compilar proyectos
-dirigidos a .NET 8. No se incluye `global.json` para no impedir el uso del SDK 8.
+- .NET SDK 8 o posterior.
+- SQL Server LocalDB para la configuración Development incluida, o una instancia SQL Server propia.
+- Node.js 22+ y npm.
 
-## Ejecución
+## Configuración y ejecución
+
+Development usa `(localdb)\MSSQLLocalDB` y la base `SbSolicitudes`. Para otra instancia, configure `ConnectionStrings__DefaultConnection` mediante variable de entorno o User Secrets. No coloque secretos de producción en `appsettings`.
 
 ```powershell
 dotnet restore SB.Solicitudes.slnx
-dotnet build SB.Solicitudes.slnx --no-restore
-dotnet run --project src/backend/SB.Solicitudes.Api
+dotnet run --project src/backend/SB.Solicitudes.Api --launch-profile http
 ```
 
-En Development, Swagger estará disponible en `/swagger` y el diagnóstico mínimo en
-`GET /health`.
+Al arrancar en Development, la API ejecuta `Database.MigrateAsync()`: crea la base si no existe, aplica migrations pendientes y ejecuta seeds idempotentes. Swagger queda en `http://localhost:5080/swagger` y salud en `http://localhost:5080/health`.
+
+En otra terminal:
 
 ```powershell
 Set-Location src/frontend/sb-solicitudes-web
@@ -43,39 +51,57 @@ npm install
 npm run dev
 ```
 
-Para configurar el frontend, copie `.env.example` como `.env`. Las configuraciones
-sensibles del backend deben establecerse mediante variables de entorno o User Secrets;
-`appsettings.Example.json` contiene solamente marcadores.
+El frontend usa `http://localhost:5080` por defecto. Puede copiar `.env.example` a `.env` para cambiar `VITE_API_BASE_URL`.
+
+## Usuarios de prueba
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `admin@sb.local` | `Admin1234!` |
+| Analista | `analista@sb.local` | `Analista1234!` |
+| Solicitante | `solicitante@sb.local` | `Solicita1234!` |
+
+Son credenciales exclusivamente locales. Las contraseñas se persisten con `PasswordHasher<TUser>`, nunca como texto plano.
+
+## Migrations
+
+EF Core es la única fuente del esquema; no existen `schema.sql` ni `seed.sql`.
+
+```powershell
+dotnet tool restore
+dotnet ef migrations add NombreMigration `
+  --project src/backend/SB.Solicitudes.Infrastructure `
+  --startup-project src/backend/SB.Solicitudes.Api `
+  --output-dir Migrations
+```
+
+En entornos con permisos DDL restringidos, las migrations deben aplicarse durante el despliegue y `Database__ApplyMigrationsOnStartup` debe permanecer en `false`.
 
 ## Verificación
 
 ```powershell
-dotnet test SB.Solicitudes.slnx
+dotnet build SB.Solicitudes.slnx --no-restore
+dotnet test SB.Solicitudes.slnx --no-build
+
 Set-Location src/frontend/sb-solicitudes-web
+npm run lint
 npm run build
 ```
 
-## Datos de entidades gubernamentales
+Las pruebas de integración crean una base LocalDB aislada con nombre aleatorio, ejecutan la migration/seed y la eliminan al terminar.
 
-La fuente suministrada contiene 181 entidades y cuatro columnas: `Nombre`,
-`Categoría`, `Poder del Estado` y `Sector`. El scaffold contempla un JSON UTF-8 en
-`App_Data` como persistencia de texto provisional. El repositorio con escritura
-atómica y su CRUD se implementarán posteriormente.
+## Entidades gubernamentales
 
-## Base de datos relacional
+Application expone una abstracción e Infrastructure implementa `TextFileGovernmentEntityRepository`. El archivo está en `src/backend/SB.Solicitudes.Api/App_Data/entidades-gubernamentales.json`; las escrituras se serializan y reemplazan el archivo mediante un temporal para evitar contenido parcial.
 
-SQL Server será administrado exclusivamente mediante EF Core migrations. No se
-mantendrán scripts `schema.sql` o `seed.sql` paralelos al modelo.
+El Excel original se conserva en `docs/fuentes/` y sus 181 filas se convirtieron a JSON UTF-8 respetando el orden, acentos y valores de las cuatro columnas. Los IDs estables 1–181 corresponden al orden original. El logo institucional y `home.svg` también se incorporaron desde los recursos suministrados.
 
-- Las migrations se crearán durante el desarrollo después de definir las entidades y
-  sus configuraciones Fluent API.
-- Al iniciar la API se aplicarán automáticamente las migrations pendientes mediante
-  `Database.MigrateAsync` y se creará la base si todavía no existe.
-- Los datos iniciales se gestionarán desde Infrastructure con un inicializador
-  idempotente, después de aplicar las migrations.
+## Supuestos y límites actuales
 
-El `DbContext`, el inicializador y la primera migration pertenecen a la siguiente fase;
-no se incluyen implementaciones vacías en este scaffold.
+- “Vencida” significa `FechaCompromiso < UTC actual` y estado distinto de `Cerrada`.
+- La notificación inicial se persiste y simula envío mediante log; el contrato permite sustituirlo por email o mensajería.
+- Se evitó Identity completo para mantener el alcance: modelo propio pequeño, hashing estándar y JWT son suficientes para la prueba.
+- Los catálogos operativos se crean mediante seeds; su mantenimiento visual puede incorporarse en un siguiente incremento.
+- Los PDF, instrucciones adicionales y maqueta mencionados en el requerimiento no estuvieron disponibles; la UI usa los colores y recursos institucionales suministrados.
 
-Consulte [docs/arquitectura.md](docs/arquitectura.md) y
-[docs/decisiones.md](docs/decisiones.md) para las decisiones vigentes.
+Consulte [arquitectura](docs/arquitectura.md), [decisiones](docs/decisiones.md) y [evidencias](docs/evidencias.md).

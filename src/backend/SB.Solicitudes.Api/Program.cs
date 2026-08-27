@@ -1,6 +1,10 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
+using SB.Solicitudes.Api.Configuration;
+using SB.Solicitudes.Api.Middleware;
 using SB.Solicitudes.Application;
 using SB.Solicitudes.Infrastructure;
+using SB.Solicitudes.Infrastructure.Persistence;
 using SB.Solicitudes.Services;
 using Serilog;
 
@@ -19,20 +23,31 @@ try
         .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
 
     builder.Services.AddProblemDetails();
-    builder.Services.AddControllers();
-    builder.Services.AddAuthorization();
+    builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+    builder.Services.AddControllers()
+        .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddJwtSwagger();
+    builder.Services.AddApiSecurity(builder.Configuration);
+    string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+    builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
 
     builder.Services
         .AddApplication()
-        .AddInfrastructure()
-        .AddPlatformServices();
+        .AddInfrastructure(builder.Configuration, builder.Environment.ContentRootPath)
+        .AddPlatformServices(builder.Configuration);
 
     WebApplication app = builder.Build();
 
+    if (builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
+    {
+        await app.Services.InitialiseDatabaseAsync();
+    }
+
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
+    app.UseCors("Frontend");
 
     if (app.Environment.IsDevelopment())
     {
@@ -40,6 +55,7 @@ try
         app.UseSwaggerUI();
     }
 
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
@@ -49,7 +65,7 @@ try
 
     app.Run();
 }
-catch (Exception exception)
+catch (Exception exception) when (exception is not HostAbortedException)
 {
     Log.Fatal(exception, "La API terminó inesperadamente");
 }

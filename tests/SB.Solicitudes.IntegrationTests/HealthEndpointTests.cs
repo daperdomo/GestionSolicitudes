@@ -1,14 +1,14 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace SB.Solicitudes.IntegrationTests;
 
-public sealed class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+[Collection(ApiIntegrationFixtureGroup.Name)]
+public sealed class HealthEndpointTests
 {
     private readonly HttpClient client;
 
-    public HealthEndpointTests(WebApplicationFactory<Program> factory)
+    public HealthEndpointTests(ApiWebApplicationFactory factory)
     {
         client = factory.CreateClient();
     }

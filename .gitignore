@@ -25,6 +25,6 @@ appsettings.Production.json
 .env.*
 !.env.example
 
-# Runtime files used by the future text repository
+# Archivos temporales usados por la persistencia JSON atómica
 *.tmp
 *.bak
