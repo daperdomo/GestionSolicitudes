@@ -18,7 +18,7 @@ public sealed class SolicitudesController(ISender sender) : ControllerBase
     public async Task<ActionResult<PagedResult<SolicitudListItem>>> Search(
         [FromQuery] SolicitudFilter filter,
         CancellationToken cancellationToken)
-    {
+    { 
         Result<PagedResult<SolicitudListItem>> result = await sender.Send(
             new BuscarSolicitudesQuery(filter, User.GetCurrentUser()),
             cancellationToken);

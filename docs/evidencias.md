@@ -10,7 +10,7 @@ Verificación final ejecutada el 27 de agosto de 2026 en Windows, SDK .NET 10.0.
 | `npm run lint` | Correcto, sin warnings |
 | `npm run build` | Correcto, bundle Vite de producción |
 
-Las pruebas unitarias cubren creación y reglas críticas de transición, espera, cierre y reapertura. La integración levanta la API, crea una LocalDB aislada, aplica migrations y seed, y valida salud, login, catálogos, creación, listado, transición con rol Analista, concurrencia optimista, asignación a cualquier usuario activo sin cambiar estado ni autorización, rechazo sin token, los 181 registros gubernamentales y el ciclo de alta/desactivación de usuarios.
+Las pruebas unitarias cubren creación y reglas críticas de transición, espera, cierre y reapertura. La integración levanta la API, crea una LocalDB aislada, aplica migrations y seed, y valida salud, login, catálogos, creación, listado, transición con rol Analista, concurrencia optimista, asignación a cualquier usuario activo sin cambiar estado ni autorización, contador/listado/lectura de notificaciones, rechazo sin token, los 181 registros gubernamentales y el ciclo de alta/desactivación de usuarios.
 
 Se verificó manualmente en `http://localhost:5080`:
 

@@ -28,6 +28,21 @@ export interface UserOption {
   correo: string
 }
 
+export interface NotificationItem {
+  id: number
+  solicitudId: number
+  codigoSolicitud: string
+  asunto: string
+  mensaje: string
+  fechaCreacion: string
+  leida: boolean
+  fechaLectura: string | null
+}
+
+export interface UnreadNotificationCount {
+  total: number
+}
+
 export interface RequestListItem {
   id: number
   codigo: string

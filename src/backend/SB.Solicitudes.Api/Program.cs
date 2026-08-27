@@ -2,7 +2,9 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using SB.Solicitudes.Api.Configuration;
 using SB.Solicitudes.Api.Middleware;
+using SB.Solicitudes.Api.Notifications;
 using SB.Solicitudes.Application;
+using SB.Solicitudes.Application.Common;
 using SB.Solicitudes.Infrastructure;
 using SB.Solicitudes.Infrastructure.Persistence;
 using SB.Solicitudes.Services;
@@ -27,16 +29,18 @@ try
     builder.Services.AddControllers()
         .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSignalR();
     builder.Services.AddJwtSwagger();
     builder.Services.AddApiSecurity(builder.Configuration);
     string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
     builder.Services
         .AddApplication()
         .AddInfrastructure(builder.Configuration, builder.Environment.ContentRootPath)
         .AddPlatformServices(builder.Configuration);
+    builder.Services.AddScoped<INotificationDispatcher, SignalRNotificationDispatcher>();
 
     WebApplication app = builder.Build();
 
@@ -59,6 +63,7 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    app.MapHub<NotificationsHub>("/hubs/notificaciones");
     app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
         .WithName("Health")
         .AllowAnonymous();

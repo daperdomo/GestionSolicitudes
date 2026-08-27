@@ -40,6 +40,22 @@ public sealed class RequestWorkflowTests
         RequestDetail? created = await createResponse.Content.ReadFromJsonAsync<RequestDetail>();
         Assert.NotNull(created);
 
+        UnreadCount? initialUnread = await client.GetFromJsonAsync<UnreadCount>("/api/notificaciones/no-leidas/count");
+        Assert.NotNull(initialUnread);
+        Assert.True(initialUnread.Total > 0);
+        NotificationRecord[] notificationItems =
+            await client.GetFromJsonAsync<NotificationRecord[]>("/api/notificaciones?limit=20") ?? [];
+        NotificationRecord createdNotification = Assert.Single(
+            notificationItems,
+            notification => notification.SolicitudId == created.Id && !notification.Leida);
+        using HttpResponseMessage readResponse = await client.PatchAsync(
+            $"/api/notificaciones/{createdNotification.Id}/leida",
+            null);
+        Assert.Equal(HttpStatusCode.NoContent, readResponse.StatusCode);
+        UnreadCount? updatedUnread = await client.GetFromJsonAsync<UnreadCount>("/api/notificaciones/no-leidas/count");
+        Assert.NotNull(updatedUnread);
+        Assert.Equal(initialUnread.Total - 1, updatedUnread.Total);
+
         using HttpResponseMessage listResponse = await client.GetAsync("/api/solicitudes?pageNumber=1&pageSize=20");
         Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
         string listJson = await listResponse.Content.ReadAsStringAsync();
@@ -190,6 +206,8 @@ public sealed class RequestWorkflowTests
     private sealed record UserRecord(Guid Id, bool Activo);
     private sealed record HistoryItem(string EstadoNuevo);
     private sealed record ActivityItem(string Tipo);
+    private sealed record UnreadCount(int Total);
+    private sealed record NotificationRecord(long Id, long SolicitudId, bool Leida);
     private sealed record RequestDetail(
         long Id,
         string Codigo,

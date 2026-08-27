@@ -12,7 +12,7 @@ Plataforma interna para registrar, asignar y dar seguimiento a solicitudes de se
 - Asignación/reasignación a cualquier usuario activo, comentarios públicos/internos, actividad e historiales inmutables.
 - Matriz explícita de transiciones; el cierre exige comentario y solo Administrador/Analista puede reabrir.
 - Concurrencia optimista mediante `RowVersion` para evitar sobrescrituras silenciosas.
-- Notificaciones persistidas en SQL Server y despachadas mediante un adaptador de logging reemplazable.
+- Campana de notificaciones persistentes con contador, listado, lectura individual/masiva y actualización en tiempo real mediante SignalR.
 - Dashboard con abiertas, cerradas, vencidas, agrupaciones y últimas solicitudes.
 - CRUD de entidades gubernamentales respaldado por JSON UTF-8 con escritura atómica.
 - React responsive con rutas protegidas, estados de carga/error/vacío y cliente HTTP centralizado.
@@ -99,7 +99,7 @@ El Excel original se conserva en `docs/fuentes/` y sus 181 filas se convirtieron
 ## Supuestos y límites actuales
 
 - “Vencida” significa `FechaCompromiso < UTC actual` y estado distinto de `Cerrada`.
-- La notificación inicial se persiste y simula envío mediante log; el contrato permite sustituirlo por email o mensajería.
+- Las notificaciones se persisten y SignalR las entrega en tiempo real al grupo privado del destinatario. `INotificationDispatcher` recibe un mensaje inmutable y puede sustituirse por un productor RabbitMQ; para producción distribuida se recomienda Outbox.
 - Se evitó Identity completo para mantener el alcance: modelo propio pequeño, hashing estándar y JWT son suficientes para la prueba.
 - Los catálogos operativos se crean mediante seeds; su mantenimiento visual puede incorporarse en un siguiente incremento.
 - Los PDF, instrucciones adicionales y maqueta mencionados en el requerimiento no estuvieron disponibles; la UI usa los colores y recursos institucionales suministrados.

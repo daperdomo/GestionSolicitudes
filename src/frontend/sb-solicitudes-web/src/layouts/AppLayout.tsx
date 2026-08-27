@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import homeIcon from '../assets/icons/home.svg'
 import { useAuth } from '../auth/useAuth'
+import { NotificationBell } from '../features/notifications/NotificationBell'
 import styles from '../styles/ui.module.css'
 
 export function AppLayout() {
@@ -39,6 +40,7 @@ export function AppLayout() {
         <header className={styles.topbar}>
           <h1>{pageTitle}</h1>
           <div className={styles.userArea}>
+            <NotificationBell />
             <div><strong>{session?.nombre}</strong><small>{session?.rol}</small></div>
             <button className={styles.secondaryButton} onClick={() => { logout(); navigate('/login') }}>Cerrar sesión</button>
           </div>

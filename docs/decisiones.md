@@ -118,3 +118,13 @@ Pasar a espera exige comentario público; cerrar exige comentario de resolución
 **Alternativa:** invocar directamente servicios de Application desde los controllers.
 
 **Trade-off:** se agregan mensajes y handlers pequeños. La lógica no se duplicó: los handlers actúan como adaptadores CQRS y los servicios existentes conservan las reglas ya probadas.
+
+## Notificaciones internas, SignalR y futura mensajería
+
+**Decisión:** persistir primero la notificación y actualizar la campana mediante un Hub SignalR autenticado. Entrega y lectura se modelan por separado.
+
+**Por qué:** la interfaz funciona inmediatamente en una sola instancia y conserva historial aun cuando el cliente está desconectado.
+
+**Alternativa:** introducir RabbitMQ desde el primer incremento.
+
+**Trade-off:** el despacho actual es directo y no ofrece entrega distribuida garantizada. `INotificationDispatcher` usa un mensaje inmutable preparado para un productor RabbitMQ. Antes de habilitar el broker se incorporará Outbox, consumo idempotente, reintentos y dead-letter queue.

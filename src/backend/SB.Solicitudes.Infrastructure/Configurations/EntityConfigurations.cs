@@ -182,6 +182,8 @@ internal sealed class NotificacionConfiguration : IEntityTypeConfiguration<Notif
         builder.Property(notification => notification.Canal).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(notification => notification.Estado).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.HasIndex(notification => new { notification.DestinatarioId, notification.Estado });
+        builder.HasIndex(notification => new { notification.DestinatarioId, notification.FechaLectura });
+        builder.HasIndex(notification => new { notification.DestinatarioId, notification.FechaCreacion });
         builder.HasOne(notification => notification.Solicitud)
             .WithMany()
             .HasForeignKey(notification => notification.SolicitudId)

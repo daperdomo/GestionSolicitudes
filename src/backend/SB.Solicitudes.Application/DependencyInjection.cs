@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SB.Solicitudes.Application.Auth;
 using SB.Solicitudes.Application.Dashboard;
 using SB.Solicitudes.Application.EntidadesGubernamentales;
+using SB.Solicitudes.Application.Notifications;
 using SB.Solicitudes.Application.Solicitudes;
 using SB.Solicitudes.Application.Usuarios;
 
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IGovernmentEntityService, GovernmentEntityService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ISolicitudService, SolicitudService>();
         services.AddScoped<UsuarioAdministrationService>();
         services.AddScoped<IUsuarioAdministrationService>(provider =>

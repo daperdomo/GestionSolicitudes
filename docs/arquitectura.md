@@ -78,7 +78,23 @@ El auto-registro público crea exclusivamente usuarios `Solicitante`; el servido
 
 Las entidades gubernamentales permanecen separadas en JSON porque el requerimiento exige texto plano dentro del proyecto. El repositorio valida que la ruta quede bajo el content root y usa exclusión mutua más reemplazo atómico.
 
-Las operaciones de solicitud crean una `Notificacion` relacional y llaman a `INotificationDispatcher`. El adaptador actual registra un evento estructurado; email, RabbitMQ o Azure Service Bus pueden sustituirlo sin cambiar Domain ni los casos de uso.
+Las operaciones de solicitud crean una `Notificacion` relacional y llaman a `INotificationDispatcher` con un `NotificationDispatchMessage` inmutable. El adaptador actual registra el evento y lo publica mediante SignalR al grupo autenticado del destinatario. Email, RabbitMQ o Azure Service Bus pueden sustituir este transporte sin cambiar Domain ni los casos de uso.
+
+La lectura es independiente de la entrega: `Estado` y `FechaEnvio` describen el despacho, mientras `FechaLectura` alimenta el contador de la campana. Los endpoints de listado, contador y lectura obtienen siempre el destinatario desde los claims del JWT.
+
+### Evolución prevista con RabbitMQ
+
+Para una instalación distribuida, el flujo recomendado es:
+
+```text
+Transacción de negocio → Outbox SQL → Publisher → RabbitMQ
+                                            ↓
+                              Consumer de notificaciones
+                                            ↓
+                               SignalR / email / otros canales
+```
+
+El Outbox evita perder mensajes entre el commit SQL y la publicación. `NotificationDispatchMessage` es el contrato candidato del broker; debe versionarse y usar `NotificationId` como clave de idempotencia. El consumidor deberá tolerar reintentos, confirmar mensajes solo después de procesarlos y utilizar dead-letter queue para fallos permanentes. RabbitMQ no se agregó como dependencia obligatoria en este incremento.
 
 ## Solicitud como elemento de trabajo
 

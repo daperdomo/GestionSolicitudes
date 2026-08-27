@@ -361,7 +361,15 @@ internal sealed class SolicitudService(
 
     private async Task DispatchAsync(Notificacion notification, CancellationToken cancellationToken)
     {
-        await notificationDispatcher.DispatchAsync(notification, cancellationToken);
+        NotificationDispatchMessage message = new(
+            notification.Id,
+            notification.SolicitudId,
+            notification.Solicitud.Codigo,
+            notification.DestinatarioId,
+            notification.Asunto,
+            notification.Mensaje,
+            notification.FechaCreacion);
+        await notificationDispatcher.DispatchAsync(message, cancellationToken);
         notification.MarcarComoEnviada(DateTimeOffset.UtcNow);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }

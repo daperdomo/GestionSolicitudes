@@ -36,10 +36,16 @@ public sealed class Notificacion
     public EstadoNotificacion Estado { get; private set; }
     public DateTimeOffset FechaCreacion { get; private set; }
     public DateTimeOffset? FechaEnvio { get; private set; }
+    public DateTimeOffset? FechaLectura { get; private set; }
 
     public void MarcarComoEnviada(DateTimeOffset fecha)
     {
         Estado = EstadoNotificacion.Enviada;
         FechaEnvio = fecha;
+    }
+
+    public void MarcarComoLeida(DateTimeOffset fecha)
+    {
+        FechaLectura ??= fecha;
     }
 }

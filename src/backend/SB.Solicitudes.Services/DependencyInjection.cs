@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SB.Solicitudes.Application.Common;
 using SB.Solicitudes.Services.Authentication;
-using SB.Solicitudes.Services.Notifications;
 
 namespace SB.Solicitudes.Services;
 
@@ -23,8 +22,6 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
-        services.AddScoped<INotificationDispatcher, LoggingNotificationDispatcher>();
-
         return services;
     }
 }
