@@ -1,4 +1,4 @@
-------------------------------------------------using SB.Solicitudes.Domain.Entities;
+using SB.Solicitudes.Domain.Entities;
 using SB.Solicitudes.Domain.Enums;
 using SB.Solicitudes.Domain.Rules;
 

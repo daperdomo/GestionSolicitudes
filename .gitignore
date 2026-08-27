@@ -3,6 +3,7 @@
 **/obj/
 .vs/
 TestResults/
+**/logs/
 *.user
 *.suo
 

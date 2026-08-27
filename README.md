@@ -43,6 +43,8 @@ dotnet run --project src/backend/SB.Solicitudes.Api --launch-profile http
 
 Al arrancar en Development, la API ejecuta `Database.MigrateAsync()`: crea la base si no existe, aplica migrations pendientes y ejecuta seeds idempotentes. Swagger queda en `http://localhost:5080/swagger` y salud en `http://localhost:5080/health`.
 
+Serilog escribe en consola y en `src/backend/SB.Solicitudes.Api/logs/sb-solicitudes-AAAA-MM-DD.log`. Los archivos rotan diariamente o al alcanzar 10 MB y se conservan los 30 más recientes; la carpeta está excluida de Git.
+
 En otra terminal:
 
 ```powershell

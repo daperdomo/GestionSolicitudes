@@ -18,11 +18,25 @@ try
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        string logsDirectory = Path.Combine(context.HostingEnvironment.ContentRootPath, "logs");
+        Directory.CreateDirectory(logsDirectory);
+
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+            .WriteTo.File(
+                Path.Combine(logsDirectory, "sb-solicitudes-.log"),
+                formatProvider: CultureInfo.InvariantCulture,
+                rollingInterval: RollingInterval.Day,
+                fileSizeLimitBytes: 10 * 1024 * 1024,
+                rollOnFileSizeLimit: true,
+                retainedFileCountLimit: 30,
+                shared: true);
+    });
 
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<ApiExceptionHandler>();
