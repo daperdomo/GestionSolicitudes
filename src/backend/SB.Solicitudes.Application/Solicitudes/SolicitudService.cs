@@ -152,7 +152,7 @@ internal sealed class SolicitudService(
             solicitud,
             solicitud.UsuarioSolicitanteId,
             "Estado de solicitud actualizado",
-            $"La solicitud {solicitud.Codigo} cambió al estado {solicitud.Estado}.");
+            $"La solicitud {solicitud.Codigo} cambió al estado {solicitud.Estado.ToFriendlyName()}.");
         await notifications.AddAsync(notification, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await DispatchAsync(notification, cancellationToken);

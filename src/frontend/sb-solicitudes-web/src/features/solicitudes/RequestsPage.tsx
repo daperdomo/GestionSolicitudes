@@ -4,16 +4,8 @@ import { useAuth } from '../../auth/useAuth'
 import { apiRequest } from '../../services/apiClient'
 import type { CatalogItem, PagedResult, RequestListItem, UserOption } from '../../types/api'
 import { formatDate } from '../../utils/format'
+import { getRequestStatusLabel, requestStatusOptions } from '../../utils/requestStatus'
 import styles from '../../styles/ui.module.css'
-
-const statusOptions = [
-  ['Registrada', 'Registrada'],
-  ['EnAnalisis', 'En análisis'],
-  ['EnProgreso', 'En progreso'],
-  ['EnEsperaSolicitante', 'En espera del solicitante'],
-  ['Resuelta', 'Resuelta'],
-  ['Cerrada', 'Cerrada'],
-]
 
 export function RequestsPage() {
   const navigate = useNavigate()
@@ -97,7 +89,7 @@ export function RequestsPage() {
     <section>
       <div className={styles.pageHeader}><p>Consulta y seguimiento.</p><Link className={styles.primaryButton} to="/solicitudes/nueva">Nueva solicitud</Link></div>
       <div className={styles.filters}>
-        <select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">Todos los estados</option>{statusOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>
+        <select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">Todos los estados</option>{requestStatusOptions.map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>
         <select value={priority} onChange={(event) => setPriority(event.target.value)}><option value="">Todas las prioridades</option>{['Baja', 'Media', 'Alta', 'Critica'].map((value) => <option key={value}>{value}</option>)}</select>
         <select value={areaId} onChange={(event) => setAreaId(event.target.value)}><option value="">Todas las áreas</option>{areas.map((area) => <option value={area.id} key={area.id}>{area.nombre}</option>)}</select>
         <select value={typeId} onChange={(event) => setTypeId(event.target.value)}><option value="">Todos los tipos</option>{types.map((type) => <option value={type.id} key={type.id}>{type.nombre}</option>)}</select>
@@ -108,7 +100,7 @@ export function RequestsPage() {
       </div>
       {error && <div className={styles.error}>{error}</div>}
       {!page ? <div className={styles.loading}>Cargando…</div> : <article className={styles.panel}>
-        {page.items.length === 0 ? <p>No se encontraron solicitudes.</p> : <div className={styles.tableWrap}><table><thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Asignado a</th><th>Prioridad</th><th>Área</th><th>Solicitante</th><th>Creada</th><th>Compromiso</th></tr></thead><tbody>{page.items.map((item) => <tr className={styles.clickableRow} key={item.id} tabIndex={0} onClick={() => navigate(`/solicitudes/${item.id}`)} onKeyDown={(event) => openFromKeyboard(event, item.id)}><td><Link to={`/solicitudes/${item.id}`}>{item.codigo}</Link></td><td>{item.titulo}</td><td>{statusOptions.find(([value]) => value === item.estado)?.[1] ?? item.estado}</td><td>{item.responsable ?? 'Sin asignar'}</td><td>{item.prioridad}</td><td>{item.area}</td><td>{item.solicitante}</td><td>{formatDate(item.fechaCreacion)}</td><td>{formatDate(item.fechaCompromiso)}</td></tr>)}</tbody></table></div>}
+        {page.items.length === 0 ? <p>No se encontraron solicitudes.</p> : <div className={styles.tableWrap}><table><thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Asignado a</th><th>Prioridad</th><th>Área</th><th>Solicitante</th><th>Creada</th><th>Compromiso</th></tr></thead><tbody>{page.items.map((item) => <tr className={styles.clickableRow} key={item.id} tabIndex={0} onClick={() => navigate(`/solicitudes/${item.id}`)} onKeyDown={(event) => openFromKeyboard(event, item.id)}><td><Link to={`/solicitudes/${item.id}`}>{item.codigo}</Link></td><td>{item.titulo}</td><td>{getRequestStatusLabel(item.estado)}</td><td>{item.responsable ?? 'Sin asignar'}</td><td>{item.prioridad}</td><td>{item.area}</td><td>{item.solicitante}</td><td>{formatDate(item.fechaCreacion)}</td><td>{formatDate(item.fechaCompromiso)}</td></tr>)}</tbody></table></div>}
         <div className={styles.pagination}><button disabled={pageNumber <= 1} onClick={() => setPageNumber((value) => value - 1)}>Anterior</button><span>Página {page.pageNumber} de {Math.max(page.totalPages, 1)}</span><button disabled={pageNumber >= page.totalPages} onClick={() => setPageNumber((value) => value + 1)}>Siguiente</button></div>
       </article>}
     </section>
