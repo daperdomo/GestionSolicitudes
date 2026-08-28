@@ -13,7 +13,7 @@ public sealed class DependencyRuleTests
     ];
 
     [Fact]
-    public void DomainDoesNotReferenceOuterLayers()
+    public void DominioNoReferenciaCapasExternas()
     {
         Assembly domainAssembly = Assembly.Load("SB.Solicitudes.Domain");
         string[] references = domainAssembly
@@ -25,7 +25,7 @@ public sealed class DependencyRuleTests
     }
 
     [Fact]
-    public void ApplicationDoesNotReferenceAdaptersOrPresentation()
+    public void AplicacionNoReferenciaAdaptadoresNiPresentacion()
     {
         Assembly applicationAssembly = Assembly.Load("SB.Solicitudes.Application");
         string[] forbiddenReferences =

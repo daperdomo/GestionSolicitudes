@@ -10,7 +10,7 @@ public sealed class SolicitudTests
     private static readonly Guid AnalystId = Guid.Parse("20000000-0000-0000-0000-000000000002");
 
     [Fact]
-    public void ChangeStatusWithInvalidTransitionFails()
+    public void CambiarEstadoConTransicionInvalidaFalla()
     {
         Solicitud request = CreateRequest();
 
@@ -26,7 +26,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void CloseWithoutResolutionCommentFails()
+    public void CerrarSinComentarioDeResolucionFalla()
     {
         Solicitud request = CreateResolvedRequest();
 
@@ -42,7 +42,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void CloseWithResolutionCommentSucceeds()
+    public void CerrarConComentarioDeResolucionEsExitoso()
     {
         Solicitud request = CreateResolvedRequest();
 
@@ -58,7 +58,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void ReopenAsRequesterFails()
+    public void ReabrirComoSolicitanteFalla()
     {
         Solicitud request = CreateClosedRequest();
 
@@ -74,7 +74,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void ReopenAsAnalystSucceeds()
+    public void ReabrirComoAnalistaEsExitoso()
     {
         Solicitud request = CreateClosedRequest();
 
@@ -90,7 +90,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void WaitForRequesterWithoutPublicCommentFails()
+    public void EsperarAlSolicitanteSinComentarioPublicoFalla()
     {
         Solicitud request = CreateRequest();
         Assert.True(request.CambiarEstado(EstadoSolicitud.EnAnalisis, AnalystId, RolUsuario.Analista, null, DateTimeOffset.UtcNow).IsSuccess);
@@ -107,7 +107,7 @@ public sealed class SolicitudTests
     }
 
     [Fact]
-    public void WaitForRequesterCanReturnToAnalysis()
+    public void EsperaDelSolicitantePuedeVolverAAnalisis()
     {
         Solicitud request = CreateRequest();
         Assert.True(request.CambiarEstado(EstadoSolicitud.EnAnalisis, AnalystId, RolUsuario.Analista, null, DateTimeOffset.UtcNow).IsSuccess);
