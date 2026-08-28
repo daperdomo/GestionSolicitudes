@@ -25,8 +25,6 @@ Plataforma interna para registrar, asignar y dar seguimiento a solicitudes de se
 - xUnit y `WebApplicationFactory` para pruebas unitarias y de integración.
 - Onion Architecture: `Domain <- Application <- Infrastructure/Services <- Api`.
 
-La solución está en `SB.Solicitudes.slnx`. No se incluye `global.json`: puede utilizarse el SDK 8 o uno posterior compatible con `net8.0`.
-
 ## Requisitos
 
 - .NET SDK 8 o posterior.
@@ -70,26 +68,6 @@ Para eliminar además los volúmenes y reiniciar con una base limpia:
 ```
 
 El equivalente sin scripts es `docker compose --env-file .env.docker up --detach --build`.
-
-### Solución de problemas de Docker Desktop en Windows
-
-Si VS Code indica que `docker` no se reconoce pero CMD sí lo encuentra, cierre todas las terminales integradas y abra una nueva; VS Code puede conservar un `PATH` anterior a la instalación. Los scripts también buscan automáticamente `docker.exe` en la instalación local de Docker Desktop.
-
-Si `docker version` muestra el cliente pero responde `Docker Desktop is unable to start`, habilite el soporte WSL 2 desde **PowerShell como Administrador**:
-
-```powershell
-wsl --install --no-distribution
-bcdedit /set hypervisorlaunchtype auto
-```
-
-Reinicie Windows, abra Docker Desktop y valide:
-
-```powershell
-wsl --status
-docker info
-```
-
-No es necesario instalar Ubuntu para Docker Desktop; al disponer de Virtual Machine Platform, Docker crea su distribución interna `docker-desktop`.
 
 ## Configuración y ejecución
 
@@ -156,13 +134,3 @@ Las pruebas de integración crean una base LocalDB aislada con nombre aleatorio,
 Application expone una abstracción e Infrastructure implementa `TextFileGovernmentEntityRepository`. El archivo está en `src/backend/SB.Solicitudes.Api/App_Data/entidades-gubernamentales.json`; las escrituras se serializan y reemplazan el archivo mediante un temporal para evitar contenido parcial.
 
 El Excel original se conserva en `docs/fuentes/` y sus 181 filas se convirtieron a JSON UTF-8 respetando el orden, acentos y valores de las cuatro columnas. Los IDs estables 1–181 corresponden al orden original. El logo institucional y `home.svg` también se incorporaron desde los recursos suministrados.
-
-## Supuestos y límites actuales
-
-- “Vencida” significa `FechaCompromiso < UTC actual` y estado distinto de `Cerrada`.
-- Las notificaciones se persisten y SignalR las entrega en tiempo real al grupo privado del destinatario. `INotificationDispatcher` recibe un mensaje inmutable y puede sustituirse por un productor RabbitMQ; para producción distribuida se recomienda Outbox.
-- Se evitó Identity completo para mantener el alcance: modelo propio pequeño, hashing estándar y JWT son suficientes para la prueba.
-- Los catálogos operativos se crean mediante seeds y se mantienen desde la sección administrativa.
-- Los PDF, instrucciones adicionales y maqueta mencionados en el requerimiento no estuvieron disponibles; la UI usa los colores y recursos institucionales suministrados.
-
-Consulte [arquitectura](docs/arquitectura.md), [decisiones](docs/decisiones.md) y [evidencias](docs/evidencias.md).
