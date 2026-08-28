@@ -65,6 +65,8 @@ try
 
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
     app.UseCors("Frontend");
 
     if (app.Environment.IsDevelopment())
@@ -81,6 +83,7 @@ try
     app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
         .WithName("Health")
         .AllowAnonymous();
+    app.MapFallbackToFile("index.html").AllowAnonymous();
 
     app.Run();
 }
