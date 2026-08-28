@@ -5,6 +5,8 @@ import { useAuth } from '../../auth/useAuth'
 import { API_BASE_URL, apiRequest } from '../../services/apiClient'
 import type { NotificationItem, UnreadNotificationCount } from '../../types/api'
 import { formatDate } from '../../utils/format'
+import { findRequestStatus, formatRequestStatusText } from '../../utils/requestStatus'
+import { RequestStatusBadge } from '../../components/RequestStatusBadge'
 import styles from '../../styles/ui.module.css'
 
 export function NotificationBell() {
@@ -89,7 +91,7 @@ export function NotificationBell() {
         aria-expanded={open}
         onClick={() => void toggle()}
       >
-        <span aria-hidden="true">🔔</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
         {unread > 0 && <span className={styles.notificationBadge}>{unread > 99 ? '99+' : unread}</span>}
       </button>
 
@@ -98,15 +100,21 @@ export function NotificationBell() {
         {loading && <p className={styles.notificationEmpty}>Cargando…</p>}
         {error && <p className={styles.notificationError}>{error}</p>}
         {!loading && !error && items.length === 0 && <p className={styles.notificationEmpty}>No tienes notificaciones.</p>}
-        {!loading && items.map((item) => <button
-          className={`${styles.notificationItem} ${item.leida ? '' : styles.notificationUnread}`}
-          type="button"
-          key={item.id}
-          onClick={() => void openNotification(item)}
-        >
-          <span><strong>{item.asunto}</strong><small>{item.codigoSolicitud} · {formatDate(item.fechaCreacion)}</small></span>
-          <span>{item.mensaje}</span>
-        </button>)}
+        {!loading && items.map((item) => {
+          const status = findRequestStatus(item.mensaje)
+          return <button
+            className={`${styles.notificationItem} ${item.leida ? '' : styles.notificationUnread}`}
+            type="button"
+            key={item.id}
+            onClick={() => void openNotification(item)}
+          >
+            <span className={styles.notificationItemHeader}><strong>{item.asunto}</strong>{!item.leida && <i>Nuevo</i>}</span>
+            {status
+              ? <span className={styles.notificationStateLine}><span>Nuevo estado</span><RequestStatusBadge status={status} /></span>
+              : <span className={styles.notificationMessage}>{formatRequestStatusText(item.mensaje)}</span>}
+            <span className={styles.notificationMetadata}><small>{item.codigoSolicitud} · {formatDate(item.fechaCreacion)}</small></span>
+          </button>
+        })}
       </section>}
     </div>
   )

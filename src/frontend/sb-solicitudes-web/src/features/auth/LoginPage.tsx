@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { ApiError } from '../../services/apiClient'
 import styles from '../../styles/ui.module.css'
@@ -7,9 +7,7 @@ import styles from '../../styles/ui.module.css'
 export function LoginPage() {
   const { session, login } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-  const registeredEmail = (location.state as { registeredEmail?: string } | null)?.registeredEmail
-  const [correo, setCorreo] = useState(registeredEmail ?? 'solicitante@sb.local')
+  const [correo, setCorreo] = useState('solicitante@sb.local')
   const [password, setPassword] = useState('Solicita1234!')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,12 +34,10 @@ export function LoginPage() {
         <img className={styles.loginLogo} src="/assets/branding/sb-logo.png" alt="Superintendencia de Bancos de la República Dominicana" />
         <h1>Gestión de solicitudes</h1>
         <p>Superintendencia de Bancos de la República Dominicana</p>
-        {registeredEmail && <div className={styles.success}>Cuenta creada correctamente. Ya puede iniciar sesión.</div>}
         {error && <div className={styles.error}>{error}</div>}
         <label>Correo<input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} required /></label>
         <label>Contraseña<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
         <button className={styles.primaryButton} disabled={loading}>{loading ? 'Ingresando…' : 'Ingresar'}</button>
-        <Link className={styles.loginLink} to="/registro">Crear una cuenta</Link>
       </form>
     </main>
   )

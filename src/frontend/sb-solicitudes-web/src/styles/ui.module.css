@@ -105,8 +105,218 @@
 .userArea {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: .75rem;
   text-align: right;
+}
+
+.userMenuRoot {
+  position: relative;
+}
+
+.userMenuButton {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 3rem;
+  padding: .3rem .45rem .3rem .7rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #fff;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.userMenuButton:hover,
+.userMenuButton:focus-visible {
+  border-color: rgb(255 255 255 / 22%);
+  background: rgb(255 255 255 / 8%);
+}
+
+.userMenuButton > svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  transition: transform .18s ease;
+}
+
+.userMenuButton > .chevronOpen {
+  transform: rotate(180deg);
+}
+
+.avatar {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 2px solid rgb(255 255 255 / 38%);
+  border-radius: 50%;
+  color: #0d3048;
+  background: #dceef7;
+  font-size: .82rem;
+  font-weight: 800;
+  place-items: center;
+}
+
+.userIdentity {
+  display: block;
+}
+
+.userIdentity strong,
+.userIdentity small {
+  display: block;
+}
+
+.userIdentity strong {
+  max-width: 11rem;
+  overflow: hidden;
+  font-size: .9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userIdentity small {
+  margin-top: .1rem;
+  font-size: .72rem;
+}
+
+.userDropdown {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + .55rem);
+  right: 0;
+  display: grid;
+  width: 19rem;
+  padding: .45rem;
+  border: 1px solid #d6e0e7;
+  border-radius: .75rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 22%);
+  text-align: left;
+  animation: dropdownEnter .14s ease-out;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userDropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem;
+  margin-bottom: .25rem;
+  border-radius: .5rem;
+  background: #f3f7f9;
+}
+
+.userDropdownHeader .avatar {
+  flex: 0 0 auto;
+  border-color: #b9d2df;
+}
+
+.userDropdownHeader > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: .1rem;
+}
+
+.userDropdownHeader strong,
+.userDropdownHeader small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userDropdownHeader small {
+  color: #5f7482;
+  font-size: .75rem;
+}
+
+.userDropdownHeader em {
+  justify-self: start;
+  margin-top: .25rem;
+  padding: .18rem .45rem;
+  border-radius: 999px;
+  color: #0d567d;
+  background: #dceef7;
+  font-size: .68rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.userDropdown a,
+.userDropdown button {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  padding: .7rem .8rem;
+  border: 0;
+  border-radius: .35rem;
+  color: #183b50;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.userDropdown a svg,
+.userDropdown button svg {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.userDropdown a span,
+.userDropdown button span {
+  display: grid;
+  gap: .1rem;
+}
+
+.userDropdown a small,
+.userDropdown button small {
+  color: #6a7d89;
+  font-size: .72rem;
+}
+
+.userDropdown a:hover,
+.userDropdown a:focus-visible,
+.userDropdown button:hover,
+.userDropdown button:focus-visible {
+  background: #eef5f8;
+}
+
+.userMenuDivider {
+  height: 1px;
+  margin: .3rem .45rem;
+  background: #e2e8ec;
+}
+
+.userDropdown .logoutMenuItem {
+  color: #9f2424;
+}
+
+.userDropdown .logoutMenuItem:hover,
+.userDropdown .logoutMenuItem:focus-visible {
+  background: #fff1f1;
 }
 
 .notificationRoot {
@@ -131,6 +341,16 @@
 .notificationButton:hover,
 .notificationButton:focus-visible {
   background: rgb(255 255 255 / 18%);
+}
+
+.notificationButton > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .notificationBadge {
@@ -190,8 +410,8 @@
 .notificationItem {
   display: grid;
   width: 100%;
-  gap: .35rem;
-  padding: .9rem 1rem;
+  gap: .55rem;
+  padding: 1rem;
   border: 0;
   border-bottom: 1px solid #edf0f4;
   color: #344f60;
@@ -205,15 +425,56 @@
   background: #f1f6f8;
 }
 
-.notificationItem > span:first-child {
+.notificationItemHeader {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: .75rem;
+}
+
+.notificationItemHeader strong {
+  color: #183b50;
+  font-size: .92rem;
+  line-height: 1.3;
+}
+
+.notificationItemHeader i {
+  padding: .15rem .4rem;
+  border-radius: 999px;
+  color: #fff;
+  background: #d9480f;
+  font-size: .62rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.notificationMessage {
+  color: #365465;
+  font-size: .86rem;
+  line-height: 1.45;
+}
+
+.notificationStateLine {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: #647b8b;
+  font-size: .78rem;
+  font-weight: 650;
+}
+
+.notificationMetadata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .65rem;
 }
 
 .notificationItem small {
   color: #647b8b;
-  white-space: nowrap;
+  font-size: .72rem;
 }
 
 .notificationUnread {
@@ -233,8 +494,61 @@
   color: #a61b1b;
 }
 
+.requestStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  padding: .22rem .55rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: .74rem;
+  font-weight: 750;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.requestStatusRegistered {
+  border-color: #b8d9e8;
+  color: #0c5475;
+  background: #e3f2f8;
+}
+
+.requestStatusAnalysis {
+  border-color: #d6c9ec;
+  color: #5a3b85;
+  background: #f1ebfa;
+}
+
+.requestStatusProgress {
+  border-color: #b7d5ed;
+  color: #155b8b;
+  background: #e2f1fc;
+}
+
+.requestStatusWaiting {
+  border-color: #edd49b;
+  color: #7a5412;
+  background: #fff4d6;
+}
+
+.requestStatusResolved {
+  border-color: #add8bd;
+  color: #21683c;
+  background: #e3f6e9;
+}
+
+.requestStatusClosed {
+  border-color: #cdd5dc;
+  color: #4d5f6d;
+  background: #edf1f4;
+}
+
 .topbar small {
   color: #bed1db;
+}
+
+.topbar .userDropdown small {
+  color: #6a7d89;
 }
 
 .mainSurface {
@@ -437,6 +751,76 @@ textarea {
 .formActions {
   display: flex;
   gap: .75rem;
+}
+
+.catalogHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.catalogHeader h2,
+.catalogHeader p {
+  margin: 0;
+}
+
+.catalogHeader p {
+  margin-top: .35rem;
+  color: #64748b;
+}
+
+.catalogCount {
+  min-width: 2.25rem;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  color: #0d4e6e;
+  background: #dceef7;
+  font-weight: 750;
+  text-align: center;
+}
+
+.catalogForm {
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #dce4eb;
+  border-radius: .55rem;
+  background: #f8fafc;
+}
+
+.catalogForm label {
+  display: grid;
+  gap: .4rem;
+  color: #334155;
+  font-weight: 650;
+}
+
+.catalogList {
+  display: grid;
+  max-height: 30rem;
+  overflow-y: auto;
+  border-top: 1px solid #e5eaf0;
+}
+
+.catalogList > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem .25rem;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.catalogList > div > div:first-child {
+  display: grid;
+  gap: .4rem;
+}
+
+.catalogItemInactive {
+  opacity: .72;
 }
 
 .checkboxLabel {
@@ -644,6 +1028,52 @@ textarea {
   background: #fbe4e4;
 }
 
+.roleAccessSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.roleAccessSummary > div {
+  padding: .8rem;
+  border: 1px solid #d8e1e8;
+  border-radius: .5rem;
+  background: #f8fafc;
+}
+
+.roleAccessSummary > .selectedRole {
+  border-color: #4f8da9;
+  background: #eef6f9;
+  box-shadow: inset 0 0 0 1px #4f8da9;
+}
+
+.roleAccessSummary p {
+  margin: .55rem 0 0;
+  color: #526579;
+  font-size: .9rem;
+  line-height: 1.4;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: .28rem .58rem;
+  border-radius: 999px;
+  color: #17485e;
+  background: #dceef5;
+  font-size: .82rem;
+  font-weight: 750;
+}
+
+.roleBadge[data-role='Administrador'] {
+  color: #6b3d08;
+  background: #fbe9c7;
+}
+
+.roleBadge[data-role='Solicitante'] {
+  color: #37506b;
+  background: #e8eef5;
+}
+
 .loading {
   padding: 2rem;
   color: #64748b;
@@ -772,6 +1202,24 @@ textarea {
     gap: .6rem;
   }
 
+  .userIdentity {
+    display: none;
+  }
+
+  .userMenuButton {
+    min-height: auto;
+    padding: .2rem;
+    border-radius: 50%;
+  }
+
+  .userMenuButton > svg {
+    display: none;
+  }
+
+  .userDropdown {
+    width: min(19rem, calc(100vw - 2rem));
+  }
+
   .mainSurface {
     min-height: calc(100vh - 4rem);
     border-radius: 1.25rem 1.25rem 0 0;
@@ -780,6 +1228,7 @@ textarea {
   .metrics,
   .gridTwo,
   .formGrid,
+  .roleAccessSummary,
   .workItemGrid {
     grid-template-columns: 1fr;
   }

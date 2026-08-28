@@ -1,4 +1,4 @@
-import { clearSession, getSession } from '../auth/sessionStorage'
+import { expireSession, getSession } from '../auth/sessionStorage'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5080'
 
@@ -38,7 +38,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
       detail: `No fue posible conectar con la API en ${API_BASE_URL}. Verifique que el backend esté ejecutándose.`,
     })
   }
-  if (response.status === 401) clearSession()
+  if (response.status === 401) expireSession()
 
   if (!response.ok) {
     const problem = await response.json().catch(() => undefined) as ProblemDetails | undefined

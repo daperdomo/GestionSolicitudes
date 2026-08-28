@@ -17,16 +17,6 @@ public sealed record CrearUsuarioRequest(
     string Password,
     RolUsuario Rol);
 
-public sealed record RegistrarSolicitanteRequest(
-    string Nombre,
-    string Correo,
-    string Password);
-
-public sealed record UsuarioRegistradoResponse(
-    Guid Id,
-    string Nombre,
-    string Correo);
-
 public sealed record ActualizarUsuarioRequest(
     string Nombre,
     string Correo,
@@ -43,12 +33,5 @@ public interface IUsuarioAdministrationService
         Guid id,
         ActualizarUsuarioRequest request,
         CurrentUser currentUser,
-        CancellationToken cancellationToken);
-}
-
-public interface IUsuarioRegistrationService
-{
-    Task<Result<UsuarioRegistradoResponse>> RegisterRequesterAsync(
-        RegistrarSolicitanteRequest request,
         CancellationToken cancellationToken);
 }

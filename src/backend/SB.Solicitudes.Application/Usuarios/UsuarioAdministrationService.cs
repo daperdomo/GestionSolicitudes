@@ -10,7 +10,7 @@ namespace SB.Solicitudes.Application.Usuarios;
 internal sealed class UsuarioAdministrationService(
     IUsuarioRepository users,
     IPasswordService passwords,
-    IUnitOfWork unitOfWork) : IUsuarioAdministrationService, IUsuarioRegistrationService
+    IUnitOfWork unitOfWork) : IUsuarioAdministrationService
 {
     public Task<IReadOnlyCollection<UsuarioListItem>> GetAllAsync(CancellationToken cancellationToken) =>
         users.GetAllAsync(cancellationToken);
@@ -45,31 +45,6 @@ internal sealed class UsuarioAdministrationService(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<UsuarioListItem>.Success(ToListItem(user));
-    }
-
-    public async Task<Result<UsuarioRegistradoResponse>> RegisterRequesterAsync(
-        RegistrarSolicitanteRequest request,
-        CancellationToken cancellationToken)
-    {
-        Result<UsuarioListItem> result = await CreateAsync(
-            new CrearUsuarioRequest(
-                request.Nombre,
-                request.Correo,
-                request.Password,
-                RolUsuario.Solicitante),
-            cancellationToken);
-
-        if (!result.IsSuccess)
-        {
-            OperationError error = result.Error!;
-            return Result<UsuarioRegistradoResponse>.Failure(error.Type, error.Code, error.Message);
-        }
-
-        UsuarioListItem user = result.Value!;
-        return Result<UsuarioRegistradoResponse>.Success(new UsuarioRegistradoResponse(
-            user.Id,
-            user.Nombre,
-            user.Correo));
     }
 
     public async Task<Result<UsuarioListItem>> UpdateAsync(

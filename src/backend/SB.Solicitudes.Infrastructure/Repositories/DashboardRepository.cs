@@ -20,6 +20,10 @@ internal sealed class DashboardRepository(ApplicationDbContext dbContext) : IDas
         {
             query = query.Where(request => request.UsuarioSolicitanteId == currentUser.Id);
         }
+        else if (currentUser.Rol == RolUsuario.Analista)
+        {
+            query = query.Where(request => request.ResponsableId == null || request.ResponsableId == currentUser.Id);
+        }
 
         int open = await query.CountAsync(request => request.Estado != EstadoSolicitud.Cerrada, cancellationToken);
         int closed = await query.CountAsync(request => request.Estado == EstadoSolicitud.Cerrada, cancellationToken);

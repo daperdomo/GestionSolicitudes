@@ -22,6 +22,15 @@ export interface CatalogItem {
   nombre: string
 }
 
+export interface CatalogAdminItem extends CatalogItem {
+  activo: boolean
+}
+
+export interface CatalogAdministration {
+  areas: CatalogAdminItem[]
+  tiposSolicitud: CatalogAdminItem[]
+}
+
 export interface UserOption {
   id: string
   nombre: string
@@ -145,10 +154,4 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest extends CreateUserRequest {
   activo: boolean
-}
-
-export interface RegisteredUser {
-  id: string
-  nombre: string
-  correo: string
 }

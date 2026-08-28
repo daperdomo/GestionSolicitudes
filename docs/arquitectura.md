@@ -60,6 +60,18 @@ Los listados mantienen `IQueryable` hasta `CountAsync`/`ToListAsync`, usan `AsNo
 
 JWT contiene identificador y rol. Controllers exigen autenticación; las policies limitan administración/gestión y Application vuelve a aplicar reglas por recurso usando claims, no IDs enviados por el cliente.
 
+La matriz de acceso funcional se aplica tanto en la navegación web como en Application:
+
+| Rol | Solicitudes | Administración |
+| --- | --- | --- |
+| Administrador | Acceso completo; consulta y crea solicitudes | Catálogos y usuarios |
+| Analista | Consulta y gestiona las asignadas a sí mismo o las que aún no tienen responsable | Sin acceso |
+| Solicitante | Crea solicitudes y consulta/comenta exclusivamente las propias | Sin acceso |
+
+La restricción del servidor es la autoridad real: cambiar una URL o fabricar una petición desde el navegador no amplía permisos. Cuando una solicitud no pertenece al alcance del usuario, el detalle responde 404 para no revelar su existencia.
+
+La sección administrativa **Catálogos** corresponde a los recursos operativos publicados bajo `/api/catalogos`: `Áreas` y `Tipos de solicitud`. Sus lecturas activas siguen disponibles para los formularios autenticados, mientras listado administrativo, alta y edición exigen la policy `Administration`. Los registros se desactivan en lugar de eliminarse para conservar las relaciones con solicitudes históricas.
+
 ## CQRS con MediatR
 
 Los controllers dependen únicamente de `ISender`. Las lecturas se representan como Queries y las mutaciones como Commands; cada mensaje tiene un `IRequestHandler` en Application. El handler recibe los datos de entrada y el `CurrentUser` obtenido desde los claims, e invoca el servicio de aplicación correspondiente.
@@ -70,7 +82,7 @@ Controller → ISender → Command/Query Handler → Application Service → Dom
 
 MediatR coordina el despacho en proceso; no sustituye las reglas de negocio ni los servicios. Los servicios existentes continúan concentrando los casos de uso y pueden migrarse gradualmente a handlers más específicos sin afectar el contrato HTTP.
 
-El auto-registro público crea exclusivamente usuarios `Solicitante`; el servidor no acepta un rol elegido por el cliente. La administración de usuarios exige la policy `Administration`, valida correo único y contraseña, y conserva usuarios inactivos para no romper la trazabilidad histórica. Un administrador no puede desactivar su propia cuenta ni retirarse su propio rol.
+No existe auto-registro público. Toda cuenta se crea desde Administración → Usuarios, bajo la policy `Administration`, donde se asigna el rol correspondiente. El proceso valida correo único y contraseña, y conserva usuarios inactivos para no romper la trazabilidad histórica. Un administrador no puede desactivar su propia cuenta ni retirarse su propio rol.
 
 ## Persistencia y notificaciones
 

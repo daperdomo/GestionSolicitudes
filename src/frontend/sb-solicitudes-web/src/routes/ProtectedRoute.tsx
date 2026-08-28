@@ -11,3 +11,10 @@ export function AdministratorRoute() {
   const { session } = useAuth()
   return session?.rol === 'Administrador' ? <Outlet /> : <Navigate to="/" replace />
 }
+
+export function RequestCreatorRoute() {
+  const { session } = useAuth()
+  return session?.rol === 'Administrador' || session?.rol === 'Solicitante'
+    ? <Outlet />
+    : <Navigate to="/solicitudes/asignadas" replace />
+}

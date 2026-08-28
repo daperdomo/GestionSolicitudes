@@ -5,8 +5,9 @@ Plataforma interna para registrar, asignar y dar seguimiento a solicitudes de se
 ## Funcionalidad implementada
 
 - Login JWT con roles `Administrador`, `Analista` y `Solicitante`.
-- Auto-registro de Solicitantes desde el login y registro administrativo con roles, activación/desactivación y contraseña inicial segura.
-- Autorización por rol y por recurso: un solicitante solo consulta y comenta sus propias solicitudes.
+- Registro administrativo de usuarios con roles, activación/desactivación y contraseña inicial segura; no existe auto-registro público.
+- Autorización por rol y por recurso: Administrador accede a catálogos, usuarios y todas las solicitudes; Analista gestiona solicitudes asignadas o disponibles; Solicitante crea y da seguimiento a las propias.
+- Administración de los catálogos operativos `Áreas` y `Tipos de solicitud`, con alta, edición y activación/desactivación segura.
 - Creación, detalle tipo Work Item, filtros, ordenamiento y paginación server-side.
 - Edición inline de estado, responsable, prioridad, área, tipo y fecha compromiso mediante endpoints `PATCH` específicos.
 - Asignación/reasignación a cualquier usuario activo, comentarios públicos/internos, actividad e historiales inmutables.

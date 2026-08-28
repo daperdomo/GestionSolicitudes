@@ -30,6 +30,7 @@ public sealed class SolicitudFilter
     public int? TipoSolicitudId { get; init; }
     public Guid? SolicitanteId { get; init; }
     public Guid? ResponsableId { get; init; }
+    public bool? SinAsignar { get; init; }
     public DateTimeOffset? FechaDesde { get; init; }
     public DateTimeOffset? FechaHasta { get; init; }
     public int PageNumber { get; init; } = 1;
@@ -116,9 +117,18 @@ public interface ICatalogRepository
     Task<CatalogItem?> GetTipoSolicitudByIdAsync(int id, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<CatalogItem>> GetAreasAsync(CancellationToken cancellationToken);
     Task<IReadOnlyCollection<CatalogItem>> GetTiposSolicitudAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<CatalogAdminItem>> GetAllAreasAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<CatalogAdminItem>> GetAllTiposSolicitudAsync(CancellationToken cancellationToken);
+    Task<Area?> GetAreaForUpdateAsync(int id, CancellationToken cancellationToken);
+    Task<TipoSolicitud?> GetTipoSolicitudForUpdateAsync(int id, CancellationToken cancellationToken);
+    Task<bool> AreaNameExistsAsync(string nombre, int? excludedId, CancellationToken cancellationToken);
+    Task<bool> TipoSolicitudNameExistsAsync(string nombre, int? excludedId, CancellationToken cancellationToken);
+    Task AddAreaAsync(Area area, CancellationToken cancellationToken);
+    Task AddTipoSolicitudAsync(TipoSolicitud tipoSolicitud, CancellationToken cancellationToken);
 }
 
 public sealed record CatalogItem(int Id, string Nombre);
+public sealed record CatalogAdminItem(int Id, string Nombre, bool Activo);
 
 public interface ISolicitudService
 {

@@ -1,11 +1,41 @@
-import { useMemo, useState, type PropsWithChildren } from 'react'
+import { useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 import { apiRequest } from '../services/apiClient'
 import type { LoginResponse } from '../types/api'
-import { clearSession, getSession, setSession } from './sessionStorage'
+import { clearSession, expireSession, getSession, SESSION_EXPIRED_EVENT, SESSION_KEY, setSession } from './sessionStorage'
 import { AuthContext, type AuthContextValue } from './useAuth'
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [session, updateSession] = useState<LoginResponse | null>(() => getSession())
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      updateSession(null)
+    }
+
+    function handleStorageChange(event: StorageEvent) {
+      if (event.key === SESSION_KEY) updateSession(getSession())
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
+    window.addEventListener('storage', handleStorageChange)
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired)
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!session) return
+    const expirationTime = new Date(session.expiresAt).getTime()
+    const remainingTime = expirationTime - Date.now()
+    if (!Number.isFinite(remainingTime) || remainingTime <= 0) {
+      expireSession()
+      return
+    }
+
+    const timeoutId = window.setTimeout(expireSession, remainingTime)
+    return () => window.clearTimeout(timeoutId)
+  }, [session])
 
   const value = useMemo<AuthContextValue>(() => ({
     session,

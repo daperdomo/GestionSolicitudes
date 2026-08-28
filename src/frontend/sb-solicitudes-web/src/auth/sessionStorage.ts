@@ -1,6 +1,7 @@
 import type { LoginResponse } from '../types/api'
 
-const SESSION_KEY = 'sb.solicitudes.session'
+export const SESSION_KEY = 'sb.solicitudes.session'
+export const SESSION_EXPIRED_EVENT = 'sb:session-expired'
 
 export function getSession(): LoginResponse | null {
   const value = sessionStorage.getItem(SESSION_KEY)
@@ -25,4 +26,9 @@ export function setSession(session: LoginResponse): void {
 
 export function clearSession(): void {
   sessionStorage.removeItem(SESSION_KEY)
+}
+
+export function expireSession(): void {
+  clearSession()
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
 }

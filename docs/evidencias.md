@@ -6,11 +6,11 @@ Verificación final ejecutada el 27 de agosto de 2026 en Windows, SDK .NET 10.0.
 |---|---|
 | `dotnet restore SB.Solicitudes.slnx` | Restauración correcta |
 | `dotnet build SB.Solicitudes.slnx -c Release --no-restore` | Correcto, 0 warnings, 0 errores |
-| `dotnet test SB.Solicitudes.slnx -c Release --no-restore` | 9 unitarias + 6 integración aprobadas |
+| `dotnet test SB.Solicitudes.slnx -c Release --no-build --no-restore` | 9 unitarias + 7 integración aprobadas |
 | `npm run lint` | Correcto, sin warnings |
 | `npm run build` | Correcto, bundle Vite de producción |
 
-Las pruebas unitarias cubren creación y reglas críticas de transición, espera, cierre y reapertura. La integración levanta la API, crea una LocalDB aislada, aplica migrations y seed, y valida salud, login, catálogos, creación, listado, transición con rol Analista, concurrencia optimista, asignación a cualquier usuario activo sin cambiar estado ni autorización, contador/listado/lectura de notificaciones, rechazo sin token, los 181 registros gubernamentales y el ciclo de alta/desactivación de usuarios.
+Las pruebas unitarias cubren creación y reglas críticas de transición, espera, cierre y reapertura. La integración levanta la API, crea una LocalDB aislada, aplica migrations y seed, y valida salud, login, catálogos, creación, listado, transición con rol Analista, concurrencia optimista, asignación a cualquier usuario activo, contador/listado/lectura de notificaciones, rechazo sin token, los 181 registros gubernamentales y el ciclo de alta/desactivación de usuarios. También comprueba la matriz por recurso: el Analista no crea solicitudes y deja de consultar una solicitud cuando se asigna a otro usuario; solo el Administrador obtiene y modifica los catálogos operativos, un registro desactivado deja de aparecer en la consulta activa y el endpoint de auto-registro público no está disponible.
 
 Se verificó manualmente en `http://localhost:5080`:
 

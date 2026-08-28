@@ -151,6 +151,10 @@ internal sealed class SolicitudRepository(ApplicationDbContext dbContext) : ISol
         {
             query = query.Where(request => request.UsuarioSolicitanteId == currentUser.Id);
         }
+        else if (currentUser.Rol == RolUsuario.Analista)
+        {
+            query = query.Where(request => request.ResponsableId == null || request.ResponsableId == currentUser.Id);
+        }
 
         query = ApplyFilters(query, filter);
         int totalItems = await query.CountAsync(cancellationToken);
@@ -206,6 +210,11 @@ internal sealed class SolicitudRepository(ApplicationDbContext dbContext) : ISol
         if (filter.ResponsableId.HasValue)
         {
             query = query.Where(request => request.ResponsableId == filter.ResponsableId.Value);
+        }
+
+        if (filter.SinAsignar == true)
+        {
+            query = query.Where(request => request.ResponsableId == null);
         }
 
         if (filter.FechaDesde.HasValue)

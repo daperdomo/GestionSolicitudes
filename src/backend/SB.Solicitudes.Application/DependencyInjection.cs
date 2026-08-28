@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using SB.Solicitudes.Application.Auth;
+using SB.Solicitudes.Application.Catalogos;
 using SB.Solicitudes.Application.Dashboard;
 using SB.Solicitudes.Application.EntidadesGubernamentales;
 using SB.Solicitudes.Application.Notifications;
@@ -18,14 +19,13 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssemblyContaining(typeof(DependencyInjection)));
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<ICatalogoAdministrationService, CatalogoAdministrationService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IGovernmentEntityService, GovernmentEntityService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ISolicitudService, SolicitudService>();
         services.AddScoped<UsuarioAdministrationService>();
         services.AddScoped<IUsuarioAdministrationService>(provider =>
-            provider.GetRequiredService<UsuarioAdministrationService>());
-        services.AddScoped<IUsuarioRegistrationService>(provider =>
             provider.GetRequiredService<UsuarioAdministrationService>());
 
         return services;

@@ -17,3 +17,13 @@ export function getRequestStatusLabel(value: string | null): string {
     ? requestStatusLabels[value as RequestStatus]
     : value
 }
+
+export function findRequestStatus(text: string): RequestStatus | null {
+  return requestStatusOptions.find(([value, label]) => text.includes(value) || text.includes(label))?.[0] ?? null
+}
+
+export function formatRequestStatusText(text: string): string {
+  return [...requestStatusOptions]
+    .sort(([left], [right]) => right.length - left.length)
+    .reduce((result, [value, label]) => result.replaceAll(value, label), text)
+}

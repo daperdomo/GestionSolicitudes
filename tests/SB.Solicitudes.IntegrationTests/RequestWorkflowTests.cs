@@ -63,6 +63,17 @@ public sealed class RequestWorkflowTests
 
         LoginResponse analyst = await LoginAsync("analista@sb.local", "Analista1234!");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", analyst.AccessToken);
+        using HttpResponseMessage analystCreateResponse = await client.PostAsJsonAsync("/api/solicitudes", new
+        {
+            titulo = "Solicitud no permitida para analista",
+            descripcion = "El analista gestiona solicitudes asignadas o disponibles.",
+            prioridad = "Media",
+            fechaCompromiso = DateTimeOffset.UtcNow.AddDays(3),
+            areaId = areas[0].Id,
+            tipoSolicitudId = requestTypes[0].Id,
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, analystCreateResponse.StatusCode);
+
         using HttpResponseMessage statusResponse = await client.PatchAsJsonAsync($"/api/solicitudes/{created.Id}/estado", new
         {
             estado = "EnAnalisis",
@@ -92,6 +103,10 @@ public sealed class RequestWorkflowTests
         Assert.Equal(requester.UsuarioId, assigned.ResponsableId);
         Assert.Equal("EnAnalisis", assigned.Estado);
         Assert.Contains(assigned.Actividad, item => item.Tipo == "Asignacion");
+
+        using HttpResponseMessage analystCannotReadAssignedToAnotherUser =
+            await client.GetAsync($"/api/solicitudes/{created.Id}");
+        Assert.Equal(HttpStatusCode.NotFound, analystCannotReadAssignedToAnotherUser.StatusCode);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", requester.AccessToken);
         using HttpResponseMessage forbiddenStatusResponse = await client.PatchAsJsonAsync($"/api/solicitudes/{created.Id}/estado", new
@@ -128,6 +143,48 @@ public sealed class RequestWorkflowTests
             Assert.False(string.IsNullOrWhiteSpace(entity.PoderEstado));
             Assert.False(string.IsNullOrWhiteSpace(entity.Sector));
         });
+    }
+
+    [Fact]
+    public async Task AdministratorCanManageOperationalCatalogs()
+    {
+        LoginResponse requester = await LoginAsync("solicitante@sb.local", "Solicita1234!");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", requester.AccessToken);
+        using HttpResponseMessage forbiddenResponse = await client.GetAsync("/api/catalogos/administracion");
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenResponse.StatusCode);
+
+        LoginResponse administrator = await LoginAsync("admin@sb.local", "Admin1234!");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", administrator.AccessToken);
+        CatalogAdministration? initial =
+            await client.GetFromJsonAsync<CatalogAdministration>("/api/catalogos/administracion");
+        Assert.NotNull(initial);
+        Assert.NotEmpty(initial.Areas);
+        Assert.NotEmpty(initial.TiposSolicitud);
+
+        string suffix = Guid.NewGuid().ToString("N")[..8];
+        using HttpResponseMessage createAreaResponse = await client.PostAsJsonAsync(
+            "/api/catalogos/areas",
+            new { nombre = $"Area integracion {suffix}" });
+        Assert.Equal(HttpStatusCode.Created, createAreaResponse.StatusCode);
+        CatalogAdminRecord? area = await createAreaResponse.Content.ReadFromJsonAsync<CatalogAdminRecord>();
+        Assert.NotNull(area);
+        Assert.True(area.Activo);
+
+        using HttpResponseMessage updateAreaResponse = await client.PutAsJsonAsync(
+            $"/api/catalogos/areas/{area.Id}",
+            new { nombre = $"Area actualizada {suffix}", activo = false });
+        Assert.Equal(HttpStatusCode.OK, updateAreaResponse.StatusCode);
+        CatalogAdminRecord? updatedArea = await updateAreaResponse.Content.ReadFromJsonAsync<CatalogAdminRecord>();
+        Assert.NotNull(updatedArea);
+        Assert.False(updatedArea.Activo);
+
+        CatalogItem[] activeAreas = await client.GetFromJsonAsync<CatalogItem[]>("/api/catalogos/areas") ?? [];
+        Assert.DoesNotContain(activeAreas, item => item.Id == area.Id);
+
+        using HttpResponseMessage createTypeResponse = await client.PostAsJsonAsync(
+            "/api/catalogos/tipos-solicitud",
+            new { nombre = $"Tipo integracion {suffix}" });
+        Assert.Equal(HttpStatusCode.Created, createTypeResponse.StatusCode);
     }
 
     [Fact]
@@ -177,7 +234,7 @@ public sealed class RequestWorkflowTests
     }
 
     [Fact]
-    public async Task PublicRegistrationAlwaysCreatesRequesterRole()
+    public async Task PublicRegistrationEndpointIsNotAvailable()
     {
         using HttpResponseMessage response = await client.PostAsJsonAsync("/api/auth/register", new
         {
@@ -187,9 +244,7 @@ public sealed class RequestWorkflowTests
             rol = "Administrador",
         });
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        LoginResponse login = await LoginAsync("auto.registro@sb.local", "Registro123!");
-        Assert.Equal("Solicitante", login.Rol);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     private async Task<LoginResponse> LoginAsync(string email, string password)
@@ -202,6 +257,10 @@ public sealed class RequestWorkflowTests
 
     private sealed record LoginResponse(string AccessToken, string Rol, Guid UsuarioId);
     private sealed record CatalogItem(int Id, string Nombre);
+    private sealed record CatalogAdminRecord(int Id, string Nombre, bool Activo);
+    private sealed record CatalogAdministration(
+        IReadOnlyCollection<CatalogAdminRecord> Areas,
+        IReadOnlyCollection<CatalogAdminRecord> TiposSolicitud);
     private sealed record GovernmentEntity(int Id, string Nombre, string Categoria, string PoderEstado, string Sector);
     private sealed record UserRecord(Guid Id, bool Activo);
     private sealed record HistoryItem(string EstadoNuevo);

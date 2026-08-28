@@ -4,6 +4,7 @@ import { apiRequest } from '../../services/apiClient'
 import type { DashboardSummary } from '../../types/api'
 import { formatDate } from '../../utils/format'
 import { getRequestStatusLabel } from '../../utils/requestStatus'
+import { RequestStatusBadge } from '../../components/RequestStatusBadge'
 import styles from '../../styles/ui.module.css'
 
 export function DashboardPage() {
@@ -29,7 +30,7 @@ export function DashboardPage() {
         <article className={styles.panel}><h2>Por estado</h2>{data.porEstado.map((item) => <div className={styles.metricRow} key={item.nombre}><span>{getRequestStatusLabel(item.nombre)}</span><strong>{item.total}</strong></div>)}</article>
         <article className={styles.panel}><h2>Por prioridad</h2>{data.porPrioridad.map((item) => <div className={styles.metricRow} key={item.nombre}><span>{item.nombre}</span><strong>{item.total}</strong></div>)}</article>
       </div>
-      <article className={styles.panel}><h2>Últimas solicitudes</h2>{data.ultimasSolicitudes.length === 0 ? <p>No hay solicitudes registradas.</p> : <div className={styles.tableWrap}><table><thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Responsable</th><th>Fecha</th></tr></thead><tbody>{data.ultimasSolicitudes.map((item) => <tr key={item.id}><td><Link to={`/solicitudes/${item.id}`}>{item.codigo}</Link></td><td>{item.titulo}</td><td>{getRequestStatusLabel(item.estado)}</td><td>{item.responsable ?? 'Sin asignar'}</td><td>{formatDate(item.fechaCreacion)}</td></tr>)}</tbody></table></div>}</article>
+      <article className={styles.panel}><h2>Últimas solicitudes</h2>{data.ultimasSolicitudes.length === 0 ? <p>No hay solicitudes registradas.</p> : <div className={styles.tableWrap}><table><thead><tr><th>Código</th><th>Título</th><th>Estado</th><th>Responsable</th><th>Fecha</th></tr></thead><tbody>{data.ultimasSolicitudes.map((item) => <tr key={item.id}><td><Link to={`/solicitudes/${item.id}`}>{item.codigo}</Link></td><td>{item.titulo}</td><td><RequestStatusBadge status={item.estado} /></td><td>{item.responsable ?? 'Sin asignar'}</td><td>{formatDate(item.fechaCreacion)}</td></tr>)}</tbody></table></div>}</article>
     </section>
   )
 }

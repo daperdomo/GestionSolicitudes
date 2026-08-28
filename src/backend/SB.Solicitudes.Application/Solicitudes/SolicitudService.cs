@@ -20,6 +20,11 @@ internal sealed class SolicitudService(
         CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
+        if (currentUser.Rol == RolUsuario.Analista)
+        {
+            return Forbidden();
+        }
+
         OperationError? validationError = ValidateCreate(request);
         if (validationError is not null)
         {
@@ -130,6 +135,11 @@ internal sealed class SolicitudService(
             return NotFound();
         }
 
+        if (!CanAccess(solicitud, currentUser))
+        {
+            return NotFound();
+        }
+
 
         if (!TrySetRowVersion(solicitud, request.RowVersion))
         {
@@ -187,6 +197,11 @@ internal sealed class SolicitudService(
             return NotFound();
         }
 
+        if (!CanAccess(solicitud, currentUser))
+        {
+            return NotFound();
+        }
+
         RuleResult rule = solicitud.Asignar(
             request.ResponsableId,
             currentUser.Id,
@@ -210,7 +225,7 @@ internal sealed class SolicitudService(
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await DispatchAsync(notification, cancellationToken);
         }
-        return await GetDetailResultAsync(id, currentUser, cancellationToken);
+        return await GetDetailResultAsync(id, currentUser, cancellationToken, enforceAccess: false);
     }
 
     public async Task<Result<SolicitudDetail>> AddCommentAsync(
@@ -255,6 +270,7 @@ internal sealed class SolicitudService(
         if (!Enum.IsDefined(request.Prioridad)) return Result<SolicitudDetail>.Failure(ErrorType.Validation, "invalid_priority", "La prioridad indicada no es válida.");
         Solicitud? solicitud = await solicitudes.GetForUpdateAsync(id, cancellationToken);
         if (solicitud is null) return NotFound();
+        if (!CanAccess(solicitud, currentUser)) return NotFound();
         if (!TrySetRowVersion(solicitud, request.RowVersion)) return InvalidRowVersion();
         RuleResult rule = solicitud.CambiarPrioridad(request.Prioridad, currentUser.Id, DateTimeOffset.UtcNow);
         return await SaveFieldChangeAsync(id, solicitud, rule, currentUser, cancellationToken);
@@ -269,6 +285,7 @@ internal sealed class SolicitudService(
         if (currentUser.Rol == RolUsuario.Solicitante) return Forbidden();
         Solicitud? solicitud = await solicitudes.GetForUpdateAsync(id, cancellationToken);
         if (solicitud is null) return NotFound();
+        if (!CanAccess(solicitud, currentUser)) return NotFound();
         if (!TrySetRowVersion(solicitud, request.RowVersion)) return InvalidRowVersion();
         RuleResult rule = solicitud.CambiarFechaCompromiso(request.FechaCompromiso, currentUser.Id, DateTimeOffset.UtcNow);
         return await SaveFieldChangeAsync(id, solicitud, rule, currentUser, cancellationToken);
@@ -283,6 +300,7 @@ internal sealed class SolicitudService(
         if (currentUser.Rol == RolUsuario.Solicitante) return Forbidden();
         Solicitud? solicitud = await solicitudes.GetForUpdateAsync(id, cancellationToken);
         if (solicitud is null) return NotFound();
+        if (!CanAccess(solicitud, currentUser)) return NotFound();
         CatalogItem? area = await catalogs.GetAreaByIdAsync(request.AreaId, cancellationToken);
         if (area is null) return Result<SolicitudDetail>.Failure(ErrorType.Validation, "invalid_area", "El área indicada no existe o está inactiva.");
         if (!TrySetRowVersion(solicitud, request.RowVersion)) return InvalidRowVersion();
@@ -299,6 +317,7 @@ internal sealed class SolicitudService(
         if (currentUser.Rol == RolUsuario.Solicitante) return Forbidden();
         Solicitud? solicitud = await solicitudes.GetForUpdateAsync(id, cancellationToken);
         if (solicitud is null) return NotFound();
+        if (!CanAccess(solicitud, currentUser)) return NotFound();
         CatalogItem? type = await catalogs.GetTipoSolicitudByIdAsync(request.TipoSolicitudId, cancellationToken);
         if (type is null) return Result<SolicitudDetail>.Failure(ErrorType.Validation, "invalid_request_type", "El tipo indicado no existe o está inactivo.");
         if (!TrySetRowVersion(solicitud, request.RowVersion)) return InvalidRowVersion();
@@ -331,12 +350,13 @@ internal sealed class SolicitudService(
     private async Task<Result<SolicitudDetail>> GetDetailResultAsync(
         long id,
         CurrentUser currentUser,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool enforceAccess = true)
     {
         bool includeInternal = currentUser.Rol != RolUsuario.Solicitante;
         SolicitudDetail? detail = await solicitudes.GetDetailAsync(id, includeInternal, cancellationToken);
 
-        if (detail is null || (currentUser.Rol == RolUsuario.Solicitante && detail.UsuarioSolicitanteId != currentUser.Id))
+        if (detail is null || (enforceAccess && !CanAccess(detail, currentUser)))
         {
             return NotFound();
         }
@@ -344,8 +364,21 @@ internal sealed class SolicitudService(
         return Result<SolicitudDetail>.Success(detail);
     }
 
-    private static bool CanAccess(Solicitud solicitud, CurrentUser currentUser) =>
-        currentUser.Rol != RolUsuario.Solicitante || solicitud.UsuarioSolicitanteId == currentUser.Id;
+    private static bool CanAccess(Solicitud solicitud, CurrentUser currentUser) => currentUser.Rol switch
+    {
+        RolUsuario.Administrador => true,
+        RolUsuario.Analista => solicitud.ResponsableId is null || solicitud.ResponsableId == currentUser.Id,
+        RolUsuario.Solicitante => solicitud.UsuarioSolicitanteId == currentUser.Id,
+        _ => false,
+    };
+
+    private static bool CanAccess(SolicitudDetail solicitud, CurrentUser currentUser) => currentUser.Rol switch
+    {
+        RolUsuario.Administrador => true,
+        RolUsuario.Analista => solicitud.ResponsableId is null || solicitud.ResponsableId == currentUser.Id,
+        RolUsuario.Solicitante => solicitud.UsuarioSolicitanteId == currentUser.Id,
+        _ => false,
+    };
 
     private static Notificacion CreateNotification(
         Solicitud solicitud,

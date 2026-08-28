@@ -21,6 +21,11 @@ const emptyForm: UserForm = {
 }
 
 const roles: UserRole[] = ['Administrador', 'Analista', 'Solicitante']
+const roleDescriptions: Record<UserRole, string> = {
+  Administrador: 'Acceso completo a catálogos, usuarios y solicitudes.',
+  Analista: 'Acceso a solicitudes asignadas o disponibles para gestión.',
+  Solicitante: 'Acceso a creación y seguimiento de sus propias solicitudes.',
+}
 
 export function UsersPage() {
   const [users, setUsers] = useState<UserRecord[]>([])
@@ -103,6 +108,12 @@ export function UsersPage() {
         <label>Correo<input type="email" value={form.correo} maxLength={254} onChange={(event) => setForm({ ...form, correo: event.target.value })} required /></label>
         <label>Rol<select value={form.rol} onChange={(event) => setForm({ ...form, rol: event.target.value as UserRole })}>{roles.map((role) => <option key={role}>{role}</option>)}</select></label>
         <label>{editingId === null ? 'Contraseña inicial' : 'Nueva contraseña (opcional)'}<input type="password" autoComplete="new-password" value={form.password} minLength={10} onChange={(event) => setForm({ ...form, password: event.target.value })} required={editingId === null} /></label>
+        <div className={`${styles.full} ${styles.roleAccessSummary}`} aria-label="Permisos por rol">
+          {roles.map((role) => <div className={form.rol === role ? styles.selectedRole : undefined} key={role}>
+            <span className={styles.roleBadge} data-role={role}>{role}</span>
+            <p>{roleDescriptions[role]}</p>
+          </div>)}
+        </div>
         {editingId !== null && <label className={styles.checkboxLabel}><input type="checkbox" checked={form.activo} onChange={(event) => setForm({ ...form, activo: event.target.checked })} /> Usuario activo</label>}
         <div className={`${styles.full} ${styles.formActions}`}>
           <button className={styles.primaryButton} disabled={saving}>{saving ? 'Guardando…' : editingId === null ? 'Registrar usuario' : 'Guardar cambios'}</button>
@@ -115,7 +126,7 @@ export function UsersPage() {
         <h2>Usuarios registrados</h2>
         {loading ? <div className={styles.loading}>Cargando usuarios…</div> : users.length === 0 ? <p>No hay usuarios registrados.</p> : (
           <div className={styles.tableWrap}>
-            <table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead><tbody>{users.map((user) => <tr key={user.id}><td>{user.nombre}</td><td>{user.correo}</td><td>{user.rol}</td><td><span className={user.activo ? styles.statusActive : styles.statusInactive}>{user.activo ? 'Activo' : 'Inactivo'}</span></td><td>{formatDate(user.fechaCreacion)}</td><td className={styles.actions}><button type="button" onClick={() => edit(user)}>Editar</button></td></tr>)}</tbody></table>
+            <table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead><tbody>{users.map((user) => <tr key={user.id}><td>{user.nombre}</td><td>{user.correo}</td><td><span className={styles.roleBadge} data-role={user.rol}>{user.rol}</span></td><td><span className={user.activo ? styles.statusActive : styles.statusInactive}>{user.activo ? 'Activo' : 'Inactivo'}</span></td><td>{formatDate(user.fechaCreacion)}</td><td className={styles.actions}><button type="button" onClick={() => edit(user)}>Editar</button></td></tr>)}</tbody></table>
           </div>
         )}
       </article>
