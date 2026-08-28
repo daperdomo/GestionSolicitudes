@@ -9,6 +9,9 @@ Verificación final ejecutada el 27 de agosto de 2026 en Windows, SDK .NET 10.0.
 | `dotnet test SB.Solicitudes.slnx -c Release --no-build --no-restore` | 9 unitarias + 7 integración aprobadas |
 | `npm run lint` | Correcto, sin warnings |
 | `npm run build` | Correcto, bundle Vite de producción |
+| `docker compose --env-file .env.docker.example config` | Compose válido: SQL Server, API y Web; variables, dependencias, health checks y volúmenes resueltos |
+
+La construcción de las imágenes no se ejecutó durante esta verificación porque Docker Desktop no estaba iniciado (`dockerDesktopLinuxEngine` no disponible). Los Dockerfiles se apoyan en las mismas compilaciones .NET y Vite ya verificadas en esta tabla.
 
 Las pruebas unitarias cubren creación y reglas críticas de transición, espera, cierre y reapertura. La integración levanta la API, crea una LocalDB aislada, aplica migrations y seed, y valida salud, login, catálogos, creación, listado, transición con rol Analista, concurrencia optimista, asignación a cualquier usuario activo, contador/listado/lectura de notificaciones, rechazo sin token, los 181 registros gubernamentales y el ciclo de alta/desactivación de usuarios. También comprueba la matriz por recurso: el Analista no crea solicitudes y deja de consultar una solicitud cuando se asigna a otro usuario; solo el Administrador obtiene y modifica los catálogos operativos, un registro desactivado deja de aparecer en la consulta activa y el endpoint de auto-registro público no está disponible.
 

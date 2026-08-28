@@ -25,6 +25,7 @@ appsettings.Production.json
 .env
 .env.*
 !.env.example
+!.env.docker.example
 
 # Archivos temporales usados por la persistencia JSON atómica
 *.tmp

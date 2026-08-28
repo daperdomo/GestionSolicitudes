@@ -33,6 +33,64 @@ La solución está en `SB.Solicitudes.slnx`. No se incluye `global.json`: puede 
 - SQL Server LocalDB para la configuración Development incluida, o una instancia SQL Server propia.
 - Node.js 22+ y npm.
 
+Para la ejecución contenerizada solo se requiere Docker Desktop con Docker Compose; no es necesario instalar .NET, Node.js ni SQL Server en el equipo anfitrión.
+
+## Ejecución con Docker
+
+Desde la raíz del repositorio, el siguiente script crea `.env.docker` a partir de la plantilla local, construye las imágenes y levanta SQL Server, API y frontend:
+
+```powershell
+.\scripts\docker-up.ps1 -Rebuild
+```
+
+Servicios publicados:
+
+| Servicio | Dirección |
+|---|---|
+| Aplicación web | `http://localhost:5173` |
+| API | `http://localhost:5080` |
+| Swagger | `http://localhost:5080/swagger` |
+| Health check | `http://localhost:5080/health` |
+| SQL Server | `localhost,1433` |
+
+La API espera que SQL Server esté saludable, crea la base `SbSolicitudes`, aplica las migrations y ejecuta los seeds idempotentes. El volumen `sqlserver-data` conserva la base y `government-entities` conserva los cambios del JSON. Serilog escribe en `src/backend/SB.Solicitudes.Api/logs` incluso desde el contenedor.
+
+Las credenciales y los puertos se configuran en `.env.docker`, archivo excluido de Git. Los valores generados desde `.env.docker.example` son exclusivamente para desarrollo local y deben cambiarse antes de publicar el entorno.
+
+Para detener los contenedores conservando los datos:
+
+```powershell
+.\scripts\docker-down.ps1
+```
+
+Para eliminar además los volúmenes y reiniciar con una base limpia:
+
+```powershell
+.\scripts\docker-down.ps1 -RemoveData
+```
+
+El equivalente sin scripts es `docker compose --env-file .env.docker up --detach --build`.
+
+### Solución de problemas de Docker Desktop en Windows
+
+Si VS Code indica que `docker` no se reconoce pero CMD sí lo encuentra, cierre todas las terminales integradas y abra una nueva; VS Code puede conservar un `PATH` anterior a la instalación. Los scripts también buscan automáticamente `docker.exe` en la instalación local de Docker Desktop.
+
+Si `docker version` muestra el cliente pero responde `Docker Desktop is unable to start`, habilite el soporte WSL 2 desde **PowerShell como Administrador**:
+
+```powershell
+wsl --install --no-distribution
+bcdedit /set hypervisorlaunchtype auto
+```
+
+Reinicie Windows, abra Docker Desktop y valide:
+
+```powershell
+wsl --status
+docker info
+```
+
+No es necesario instalar Ubuntu para Docker Desktop; al disponer de Virtual Machine Platform, Docker crea su distribución interna `docker-desktop`.
+
 ## Configuración y ejecución
 
 Development usa `(localdb)\MSSQLLocalDB` y la base `SbSolicitudes`. Para otra instancia, configure `ConnectionStrings__DefaultConnection` mediante variable de entorno o User Secrets. No coloque secretos de producción en `appsettings`.
@@ -104,7 +162,7 @@ El Excel original se conserva en `docs/fuentes/` y sus 181 filas se convirtieron
 - “Vencida” significa `FechaCompromiso < UTC actual` y estado distinto de `Cerrada`.
 - Las notificaciones se persisten y SignalR las entrega en tiempo real al grupo privado del destinatario. `INotificationDispatcher` recibe un mensaje inmutable y puede sustituirse por un productor RabbitMQ; para producción distribuida se recomienda Outbox.
 - Se evitó Identity completo para mantener el alcance: modelo propio pequeño, hashing estándar y JWT son suficientes para la prueba.
-- Los catálogos operativos se crean mediante seeds; su mantenimiento visual puede incorporarse en un siguiente incremento.
+- Los catálogos operativos se crean mediante seeds y se mantienen desde la sección administrativa.
 - Los PDF, instrucciones adicionales y maqueta mencionados en el requerimiento no estuvieron disponibles; la UI usa los colores y recursos institucionales suministrados.
 
 Consulte [arquitectura](docs/arquitectura.md), [decisiones](docs/decisiones.md) y [evidencias](docs/evidencias.md).
